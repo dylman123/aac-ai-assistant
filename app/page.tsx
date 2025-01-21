@@ -9,11 +9,14 @@ interface ChatMessage {
 
 export default function Home() {
   const [partnerInput, setPartnerInput] = useState('');
+  const [userInput, setUserInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [userInput, setUserInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const chatWindowRef = useRef<HTMLDivElement>(null);
+
+  // Add debounce timeout ref
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Add effect to scroll to bottom whenever chat history changes
   useEffect(() => {
@@ -22,11 +25,21 @@ export default function Home() {
     }
   }, [chatHistory, suggestions]);
 
-  const getSuggestions = async (input: string) => {
-    if (!input.trim() && !partnerInput.trim()) return;
+  const getSuggestions = async (inputValue?: string) => {
+    if (!inputValue?.trim() && !partnerInput.trim()) return;
     
     setLoading(true);
-    console.log({partnerInput})
+
+    // Only update partner input state if there was a message
+    const newChatHistory = partnerInput.trim() 
+      ? [...chatHistory, { text: partnerInput, isUser: false }]
+      : chatHistory;
+
+    if (partnerInput.trim()) {
+      setChatHistory(newChatHistory);
+      setPartnerInput('');
+    }
+
     try {
       const response = await fetch('/api/suggestions', {
         method: 'POST',
@@ -34,20 +47,16 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          partnerInput,
-          userInput: input,
-          chatHistory 
+          userInput: inputValue,
+          chatHistory: newChatHistory,
         }),
       });
       
       const data = await response.json();
-      setSuggestions(data.suggestions);
-      
-      // Only add partner input to history when they submit
-      if (partnerInput.trim()) {
-        setChatHistory([...chatHistory, { text: partnerInput, isUser: false }]);
-        setPartnerInput('');
+      if (!Array.isArray(data.suggestions)) {
+        throw new Error(`Invalid suggestions: ${data.suggestions}`);
       }
+      setSuggestions(data.suggestions as string[]);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -64,8 +73,26 @@ export default function Home() {
   const handleUserInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setUserInput(newValue);
-    getSuggestions(newValue);
+    
+    // Clear any existing timeout
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    // Set new timeout
+    debounceTimeout.current = setTimeout(() => {
+      getSuggestions(newValue);
+    }, 300); // 300ms debounce
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, []);
 
   const handleSendMessage = () => {
     if (!userInput.trim()) return;
@@ -86,13 +113,13 @@ export default function Home() {
             type="text"
             value={partnerInput}
             onChange={(e) => setPartnerInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && getSuggestions(userInput)}
+            onKeyDown={(e) => e.key === 'Enter' && getSuggestions()}
             placeholder="Type your message..."
             className="flex-1 p-2 border border-green-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-green-300 focus:border-green-300"
             disabled={loading}
           />
           <button
-            onClick={() => getSuggestions(userInput)}
+            onClick={() => getSuggestions()}
             disabled={loading}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400"
           >

@@ -1,6 +1,8 @@
-import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions.mjs';
+import { zodResponseFormat } from 'openai/helpers/zod';
+import { z } from 'zod';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -11,10 +13,13 @@ interface ChatMessage {
   isUser: boolean;
 }
 
+const suggestionsSchema = z.object({
+  suggestions: z.array(z.string())
+});
+
 export async function POST(request: Request) {
   try {
-    const { partnerInput, userInput, chatHistory }: {
-      partnerInput?: string;
+    const { userInput, chatHistory }: {
       userInput?: string; 
       chatHistory: ChatMessage[];
     } = await request.json();
@@ -29,61 +34,40 @@ export async function POST(request: Request) {
     const messages = [
       {
         role: "system",
-        content: `You are an AI assistant helping someone with communication difficulties generate natural responses in conversations. Your task is to provide exactly 3 appropriate response options.
+        content: `You are an AI assistant helping someone with communication difficulties generate natural responses or follow-up questions in conversations. Your task is to provide exactly THREE appropriate suggestions.
 
-Rules:
-- Always provide exactly 3 responses, one per line
-- Never include numbers, bullets, or any other formatting
-- If the user has started typing, every response MUST start with their exact input
-- Keep responses natural and conversational
-- Make each response distinct
-- Consider the full conversation context
-- Never include explanations or additional text`
+CRITICAL RULES:
+- Always respond with an array of length 3, with each element being a string that represents a suggestion
+- If the user is typing something, every response MUST include their exact input somewhere in each suggestion
+- Never include numbers, bullets, any other formatting, explanations, or additional text
+- Keep responses natural, conversational and appropriate to the most recent message in the conversation history
+- Make each suggestion distinct from the others
+- Consider the full conversation context`
       },
       {
         role: "user",
         content: `Conversation history:
 ${formattedHistory}
 
-${partnerInput ? `Partner's most recent message: "${partnerInput}"` : ''}
-${userInput ? `User is currently typing: "${userInput}"` : ''}
-
-CRITICAL: If the user is typing something, EVERY response MUST start with exactly "${userInput}". Do not alter or paraphrase their input - use it exactly as written.
-
-Generate exactly 3 complete, natural responses that match these criteria:
-- Start with the user's exact input if provided
-- Are appropriate responses to the partner's message
-- Consider the full conversation context
-- Are distinct from each other
-- Are natural and conversational
-
-Important: Provide exactly 3 responses, one per line, with no numbers, bullets, or additional text.`
+${userInput ? `User is currently typing: "${userInput}"` : ''}`
+      },
+      {
+        role: "assistant",
+        content: '['
       }
     ];
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-2024-08-06",
       messages: messages as ChatCompletionMessageParam[],
       temperature: 0.7,
       max_tokens: 200,
+      response_format: zodResponseFormat(suggestionsSchema, 'suggestions'),
     });
 
-    let suggestions = completion.choices[0].message?.content
-      ?.split('\n')
-      .filter((line: string) => line.trim().length > 0)
-      .map((line: string) => line.replace(/^[-*\d.\s]+/, '').trim())
-      .map((line: string) => line.replace(/^["](.*)["]$/, '$1'))
-      .slice(0, 3) || [];
+    let suggestions = (JSON.parse(completion.choices[0]?.message?.content || '{ suggestions: [] }').suggestions || []) as string[]
 
-    // Ensure all suggestions start with user input if it exists
-    console.log({userInput, suggestions, formattedHistory, partnerInput})
-    if (userInput?.trim()) {
-      suggestions = suggestions.map(suggestion => 
-        suggestion.startsWith(userInput) 
-          ? suggestion 
-          : `${userInput}${suggestion}`
-      );
-    }
+    console.log({formattedHistory, userInput, suggestions})
 
     return NextResponse.json({ suggestions });
 
