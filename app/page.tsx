@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ChatMessage {
   text: string;
@@ -13,11 +13,20 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [userInput, setUserInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+
+  // Add effect to scroll to bottom whenever chat history changes
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [chatHistory, suggestions]);
 
   const getSuggestions = async (input: string) => {
     if (!input.trim() && !partnerInput.trim()) return;
     
     setLoading(true);
+    console.log({partnerInput})
     try {
       const response = await fetch('/api/suggestions', {
         method: 'POST',
@@ -36,7 +45,7 @@ export default function Home() {
       
       // Only add partner input to history when they submit
       if (partnerInput.trim()) {
-        setChatHistory([...chatHistory, { text: partnerInput, isUser: true }]);
+        setChatHistory([...chatHistory, { text: partnerInput, isUser: false }]);
         setPartnerInput('');
       }
     } catch (error) {
@@ -47,7 +56,7 @@ export default function Home() {
   };
 
   const selectSuggestion = (suggestion: string) => {
-    setChatHistory([...chatHistory, { text: suggestion, isUser: false }]);
+    setChatHistory([...chatHistory, { text: suggestion, isUser: true }]);
     setSuggestions([]);
     setUserInput('');
   };
@@ -56,6 +65,13 @@ export default function Home() {
     const newValue = e.target.value;
     setUserInput(newValue);
     getSuggestions(newValue);
+  };
+
+  const handleSendMessage = () => {
+    if (!userInput.trim()) return;
+    setChatHistory([...chatHistory, { text: userInput, isUser: true }]);
+    setUserInput('');
+    setSuggestions([]);
   };
 
   return (
@@ -86,7 +102,10 @@ export default function Home() {
       </div>
       
       {/* Shared Chat History */}
-      <div className="mb-4 border rounded-lg p-4 h-[400px] overflow-y-auto bg-gray-50">
+      <div 
+        ref={chatWindowRef}
+        className="mb-4 border rounded-lg p-4 h-[400px] overflow-y-auto bg-gray-50"
+      >
         <div className="text-sm text-gray-500 font-semibold mb-2 text-center sticky -top-4 bg-gray-50">
           Conversation History
         </div>
@@ -96,8 +115,8 @@ export default function Home() {
             key={index}
             className={`mb-2 p-2 rounded-lg ${
               message.isUser
-                ? 'bg-green-500 text-white mr-auto max-w-[80%]'
-                : 'bg-blue-500 text-white ml-auto max-w-[80%]'
+                ? 'bg-blue-500 text-white ml-auto max-w-[80%]'
+                : 'bg-green-500 text-white mr-auto max-w-[80%]'
             }`}
           >
             {message.text}
@@ -122,7 +141,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Combined User Input Area (removed suggestions section) */}
+      {/* Combined User Input Area */}
       <div className="bg-blue-50 p-4 rounded-lg">
         <div className="text-sm text-blue-700 font-semibold mb-2">Your Message</div>
         <div className="flex gap-2">
@@ -130,9 +149,19 @@ export default function Home() {
             type="text"
             value={userInput}
             onChange={handleUserInputChange}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type to see suggestions..."
             className="flex-1 p-2 border border-blue-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
           />
+          <button
+            onClick={handleSendMessage}
+            disabled={!userInput.trim()}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg 
+                     hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed
+                     transition-colors duration-200"
+          >
+            Send
+          </button>
         </div>
       </div>
     </main>
