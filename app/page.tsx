@@ -87,7 +87,10 @@ export default function Home() {
       
       {/* Shared Chat History */}
       <div className="mb-4 border rounded-lg p-4 h-[400px] overflow-y-auto bg-gray-50">
-        <div className="text-sm text-gray-500 font-semibold mb-2 text-center sticky -top-4 bg-gray-50">Conversation History</div>
+        <div className="text-sm text-gray-500 font-semibold mb-2 text-center sticky -top-4 bg-gray-50">
+          Conversation History
+        </div>
+        
         {chatHistory.map((message, index) => (
           <div
             key={index}
@@ -100,37 +103,36 @@ export default function Home() {
             {message.text}
           </div>
         ))}
+
+        {/* Suggestions appear at the bottom of chat history */}
+        {suggestions.length > 0 && (
+          <div className="flex flex-col gap-2 mt-4">
+            {suggestions.map((suggestion, index) => (
+              <button
+                key={index}
+                onClick={() => selectSuggestion(suggestion)}
+                className="ml-auto p-2 rounded-lg bg-blue-100 text-blue-900 
+                         hover:bg-blue-200 transition-colors duration-200
+                         text-left max-w-[80%] cursor-pointer"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Combined User Input and Suggestions Area */}
+      {/* Combined User Input Area (removed suggestions section) */}
       <div className="bg-blue-50 p-4 rounded-lg">
         <div className="text-sm text-blue-700 font-semibold mb-2">Your Message</div>
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={userInput}
-              onChange={handleUserInputChange}
-              placeholder="Type to see suggestions..."
-              className="flex-1 p-2 border border-blue-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
-            />
-          </div>
-          {suggestions.length > 0 && (
-            <div className="space-y-1">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => selectSuggestion(suggestion)}
-                  className="w-full p-2 text-left border border-blue-200 rounded-lg 
-                           bg-white text-gray-700 hover:bg-blue-100 
-                           transition-colors duration-200
-                           focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={userInput}
+            onChange={handleUserInputChange}
+            placeholder="Type to see suggestions..."
+            className="flex-1 p-2 border border-blue-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
+          />
         </div>
       </div>
     </main>
