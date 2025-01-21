@@ -39,10 +39,10 @@ export async function POST(request: Request) {
 CRITICAL RULES:
 - Always respond with an array of length 3, with each element being a string that represents a suggestion
 - If the user is typing something, every response MUST include their exact input somewhere in each suggestion
-- Never include numbers, bullets, any other formatting, explanations, or additional text
 - Keep responses natural, conversational and appropriate to the most recent message in the conversation history
-- Make each suggestion distinct from the others
-- Consider the full conversation context`
+- Make sure one suggestion is positive, one is neutral, and one is negative
+- Consider the full conversation context
+`
       },
       {
         role: "user",
@@ -61,7 +61,7 @@ ${userInput ? `User is currently typing: "${userInput}"` : ''}`
       model: "gpt-4o-2024-08-06",
       messages: messages as ChatCompletionMessageParam[],
       temperature: 0.7,
-      max_tokens: 200,
+      max_completion_tokens: 200,
       response_format: zodResponseFormat(suggestionsSchema, 'suggestions'),
     });
 

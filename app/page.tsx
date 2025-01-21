@@ -154,15 +154,20 @@ export default function Home() {
         {suggestions.length > 0 && (
           <div className="flex flex-col gap-2 mt-4">
             {suggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => selectSuggestion(suggestion)}
-                className="ml-auto p-2 rounded-lg bg-blue-100 text-blue-900 
+              <div key={index} className="ml-auto flex items-center gap-2 justify-end">
+                <div className="text-3xl text-blue-700 font-semibold mb-2">
+                  {index === 0 ? '😊' : index === 1 ? '😐' : '😞'}
+                </div>
+                <button
+                  key={index}
+                  onClick={() => selectSuggestion(suggestion)}
+                  className="ml-4 p-2 rounded-lg bg-blue-100 text-blue-900 
                          hover:bg-blue-200 transition-colors duration-200
                          text-left max-w-[80%] cursor-pointer"
               >
                 {suggestion}
-              </button>
+                </button>
+              </div>
             ))}
           </div>
         )}
