@@ -87,7 +87,7 @@ export default function Home() {
       
       {/* Shared Chat History */}
       <div className="mb-4 border rounded-lg p-4 h-[400px] overflow-y-auto bg-gray-50">
-        <div className="text-sm text-gray-500 font-semibold mb-2 text-center">Conversation History</div>
+        <div className="text-sm text-gray-500 font-semibold mb-2 text-center sticky -top-4 bg-gray-50">Conversation History</div>
         {chatHistory.map((message, index) => (
           <div
             key={index}
