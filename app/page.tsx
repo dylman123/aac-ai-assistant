@@ -8,13 +8,14 @@ interface ChatMessage {
 }
 
 export default function Home() {
-  const [userInput, setUserInput] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [partnerInput, setPartnerInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userInput, setUserInput] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  const getSuggestions = async () => {
-    if (!userInput.trim()) return;
+  const getSuggestions = async (input: string) => {
+    if (!input.trim() && !partnerInput.trim()) return;
     
     setLoading(true);
     try {
@@ -23,15 +24,21 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userInput }),
+        body: JSON.stringify({ 
+          partnerInput,
+          userInput: input,
+          chatHistory 
+        }),
       });
       
       const data = await response.json();
-      console.log({data});
-      setSuggestions(JSON.parse(data));
-      // Add user input to chat history
-      setChatHistory([...chatHistory, { text: userInput, isUser: true }]);
-      setUserInput('');
+      setSuggestions(data.suggestions);
+      
+      // Only add partner input to history when they submit
+      if (partnerInput.trim()) {
+        setChatHistory([...chatHistory, { text: partnerInput, isUser: true }]);
+        setPartnerInput('');
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -42,6 +49,13 @@ export default function Home() {
   const selectSuggestion = (suggestion: string) => {
     setChatHistory([...chatHistory, { text: suggestion, isUser: false }]);
     setSuggestions([]);
+    setUserInput('');
+  };
+
+  const handleUserInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setUserInput(newValue);
+    getSuggestions(newValue);
   };
 
   return (
@@ -54,19 +68,19 @@ export default function Home() {
         <div className="flex gap-2">
           <input
             type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && getSuggestions()}
+            value={partnerInput}
+            onChange={(e) => setPartnerInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && getSuggestions(userInput)}
             placeholder="Type your message..."
             className="flex-1 p-2 border border-green-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-green-300 focus:border-green-300"
             disabled={loading}
           />
           <button
-            onClick={getSuggestions}
+            onClick={() => getSuggestions(userInput)}
             disabled={loading}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400"
           >
-            {loading ? 'Loading...' : 'Send Message'}
+            {loading ? 'Loading...' : 'Send'}
           </button>
         </div>
       </div>
@@ -88,26 +102,37 @@ export default function Home() {
         ))}
       </div>
 
-      {/* User's Response Options */}
-      {suggestions.length > 0 && (
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <div className="text-sm text-blue-700 font-semibold mb-2">Your Response Options</div>
-          <div className="space-y-2">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => selectSuggestion(suggestion)}
-                className="w-full p-3 text-left border border-blue-200 rounded-lg 
-                         bg-white text-gray-700 hover:bg-blue-100 
-                         transition-colors duration-200
-                         focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
-              >
-                {suggestion}
-              </button>
-            ))}
+      {/* Combined User Input and Suggestions Area */}
+      <div className="bg-blue-50 p-4 rounded-lg">
+        <div className="text-sm text-blue-700 font-semibold mb-2">Your Message</div>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={userInput}
+              onChange={handleUserInputChange}
+              placeholder="Type to see suggestions..."
+              className="flex-1 p-2 border border-blue-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
+            />
           </div>
+          {suggestions.length > 0 && (
+            <div className="space-y-1">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => selectSuggestion(suggestion)}
+                  className="w-full p-2 text-left border border-blue-200 rounded-lg 
+                           bg-white text-gray-700 hover:bg-blue-100 
+                           transition-colors duration-200
+                           focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </main>
   );
 }
