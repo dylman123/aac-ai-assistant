@@ -196,43 +196,42 @@ export default function Home() {
     }
   };
 
+  const handleInputBlur = () => {
+    window.scrollTo(0, 0);
+  };
+
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">AAC Assistant</h1>
+      <h1 className="text-2xl font-bold mb-8 text-center">Smart AAC Assistant</h1>
       
-      {/* Conversation Partner's Input Area */}
-      <div className="bg-green-50 p-4 rounded-lg mb-4">
-        <div className="text-sm text-green-700 font-semibold mb-2">
-          Conversation Partner&apos;s Speech Input
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <button
-            onClick={isRecording ? stopRecording : startRecording}
-            disabled={loading}
-            className={`px-6 py-3 rounded-full flex items-center gap-2 transition-colors duration-200 ${
-              isRecording 
-                ? 'bg-red-500 hover:bg-red-600 text-white' 
-                : 'bg-green-500 hover:bg-green-600 text-white'
-            } disabled:bg-gray-400 disabled:cursor-not-allowed`}
-          >
-            {loading ? (
-              <span className="animate-spin">⏳</span>
-            ) : isRecording ? (
-              <>
-                <span className="animate-pulse">●</span> Stop Recording
-              </>
-            ) : (
-              <>
-                <span>🎤</span> Start Recording
-              </>
-            )}
-          </button>
-          {permissionError && (
-            <div className="text-red-500 text-sm text-center mt-2">
-              {permissionError}
-            </div>
+      {/* Conversation Partner's Audio Input */}
+      <div className="mb-4 flex flex-col items-center gap-2">
+        <button
+          onClick={isRecording ? stopRecording : startRecording}
+          disabled={loading}
+          className={`px-6 py-3 rounded-full flex items-center gap-2 transition-colors duration-200 ${
+            isRecording 
+              ? 'bg-red-500 hover:bg-red-600 text-white' 
+              : 'bg-green-500 hover:bg-green-600 text-white'
+          } disabled:bg-gray-400 disabled:cursor-not-allowed`}
+        >
+          {loading ? (
+            <span className="animate-spin">⏳</span>
+          ) : isRecording ? (
+            <>
+              <span className="animate-pulse">●</span> Stop Listening
+            </>
+          ) : (
+            <>
+              <span>👂</span> Start Listening
+            </>
           )}
-        </div>
+        </button>
+        {permissionError && (
+          <div className="text-red-500 text-sm text-center mt-2">
+            {permissionError}
+          </div>
+        )}
       </div>
       
       {/* Shared Chat History */}
@@ -282,14 +281,14 @@ export default function Home() {
 
       {/* Combined User Input Area */}
       <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="text-sm text-blue-700 font-semibold mb-2">Your Message</div>
         <div className="flex gap-2">
           <input
             type="text"
             value={userInput}
             onChange={handleUserInputChange}
+            onBlur={handleInputBlur}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type to see suggestions..."
+            placeholder="Type to modify suggestions..."
             className="flex-1 p-2 border border-blue-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
           />
           <button
