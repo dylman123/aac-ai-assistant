@@ -21,6 +21,8 @@ export default function Home() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+
   // Add effect to scroll to bottom whenever chat history changes
   useEffect(() => {
     if (chatWindowRef.current) {
@@ -118,10 +120,24 @@ export default function Home() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+      setPermissionError(null); // Clear any previous errors
+
+      // First check if getUserMedia is supported
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Audio recording is not supported in this browser');
+      }
+
+      // Get supported MIME type
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/mp4';
+
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: true,
+        video: false
       });
+      
+      const mediaRecorder = new MediaRecorder(stream, {mimeType});
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -131,10 +147,19 @@ export default function Home() {
         }
       };
 
-      mediaRecorder.start(250); // Collect data every 250ms
+      mediaRecorder.start(250);
       setIsRecording(true);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error accessing microphone:', error);
+      if (error instanceof Error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
+        setPermissionError('Please allow microphone access to record audio');
+      } else if (error instanceof Error && error.name === 'NotFoundError') {
+        setPermissionError('No microphone found. Please connect a microphone and try again');
+      } else {
+        setPermissionError(error instanceof Error ? error.message : 'Failed to start recording');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,7 +186,6 @@ export default function Home() {
         body: formData,
       });      
       const data = await response.json();
-      console.log({data})
       if (data.text) {
         getSuggestions({newPartnerInput: data.text});
       }
@@ -178,8 +202,10 @@ export default function Home() {
       
       {/* Conversation Partner's Input Area */}
       <div className="bg-green-50 p-4 rounded-lg mb-4">
-        <div className="text-sm text-green-700 font-semibold mb-2">Conversation Partner&apos;s Speech Input</div>
-        <div className="flex justify-center">
+        <div className="text-sm text-green-700 font-semibold mb-2">
+          Conversation Partner&apos;s Speech Input
+        </div>
+        <div className="flex flex-col items-center gap-2">
           <button
             onClick={isRecording ? stopRecording : startRecording}
             disabled={loading}
@@ -187,9 +213,11 @@ export default function Home() {
               isRecording 
                 ? 'bg-red-500 hover:bg-red-600 text-white' 
                 : 'bg-green-500 hover:bg-green-600 text-white'
-            } disabled:bg-gray-400`}
+            } disabled:bg-gray-400 disabled:cursor-not-allowed`}
           >
-            {isRecording ? (
+            {loading ? (
+              <span className="animate-spin">⏳</span>
+            ) : isRecording ? (
               <>
                 <span className="animate-pulse">●</span> Stop Recording
               </>
@@ -199,6 +227,11 @@ export default function Home() {
               </>
             )}
           </button>
+          {permissionError && (
+            <div className="text-red-500 text-sm text-center mt-2">
+              {permissionError}
+            </div>
+          )}
         </div>
       </div>
       
