@@ -29,7 +29,6 @@ export default function Home() {
   }, [chatHistory, suggestions]);
 
   const getSuggestions = async ({newUserInput, newPartnerInput}: {newUserInput?: string, newPartnerInput?: string}) => {
-    console.log({newUserInput, newPartnerInput})
     if (!newUserInput?.trim() && !newPartnerInput?.trim()) return;
     setLoading(true);
 
@@ -67,6 +66,20 @@ export default function Home() {
   };
 
   const selectSuggestion = (suggestion: string) => {
+    const utterance = new SpeechSynthesisUtterance(suggestion);
+    utterance.rate = 1.0; // Speed: 0.1 to 10
+    utterance.pitch = 1.1; // Pitch: 0 to 2
+    utterance.volume = 1.0; // Volume: 0 to 1
+    
+    // Optionally select a specific voice
+    const voices = window.speechSynthesis.getVoices();
+    console.log(JSON.stringify(voices, null, 2))
+    if (voices.length > 0) {
+      utterance.voice = voices[0]; // Select first available voice
+    }
+
+    window.speechSynthesis.speak(utterance);
+
     setChatHistory([...chatHistory, { text: suggestion, isUser: true }]);
     setSuggestions([]);
     setUserInput('');
