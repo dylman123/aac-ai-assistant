@@ -23,12 +23,37 @@ export default function Home() {
 
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
+  // Add new state for voice selection
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+
   // Add effect to scroll to bottom whenever chat history changes
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
     }
   }, [chatHistory, suggestions]);
+
+  // Add useEffect to load voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
+      // Set default voice (preferably an English one)
+      const defaultVoice = availableVoices.find(voice => voice.lang.startsWith('en')) || availableVoices[0];
+      setSelectedVoice(defaultVoice);
+    };
+
+    // Load voices immediately if available
+    loadVoices();
+    
+    // Chrome loads voices asynchronously, so we need this
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
   const getSuggestions = async ({newUserInput, newPartnerInput}: {newUserInput?: string, newPartnerInput?: string}) => {
     if (!newUserInput?.trim() && !newPartnerInput?.trim()) return;
@@ -69,16 +94,12 @@ export default function Home() {
 
   const selectSuggestion = (suggestion: string) => {
     const utterance = new SpeechSynthesisUtterance(suggestion);
-    utterance.rate = 1.0; // Speed: 0.1 to 10
-    utterance.pitch = 1.1; // Pitch: 0 to 2
-    utterance.volume = 1.0; // Volume: 0 to 1
-    
-    // Optionally select a specific voice
-    const voices = window.speechSynthesis.getVoices();
-    console.log(JSON.stringify(voices, null, 2))
-    if (voices.length > 0) {
-      utterance.voice = voices[0]; // Select first available voice
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
     }
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
 
     window.speechSynthesis.speak(utterance);
 
@@ -279,8 +300,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* Combined User Input Area */}
-      <div className="bg-blue-50 p-4 rounded-lg">
+      {/* Combined User Input Area with Voice Settings */}
+      <div className="bg-blue-50 p-4 rounded-lg mb-2">
         <div className="flex gap-2">
           <input
             type="text"
@@ -302,6 +323,27 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* Voice Settings */}
+      <div className="flex justify-end items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+          <label className="whitespace-nowrap text-gray-700 dark:text-gray-200">
+            Voice:
+          </label>
+          <select
+            value={selectedVoice?.voiceURI || ''}
+            onChange={(e) => {
+              const voice = voices.find(v => v.voiceURI === e.target.value);
+              setSelectedVoice(voice || null);
+            }}
+            className="p-1 border border-gray-300 dark:border-gray-600 rounded text-xs bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-300 focus:border-blue-300"
+          >
+            {voices.map((voice) => (
+              <option key={voice.voiceURI} value={voice.voiceURI}>
+                {`${voice.name} (${voice.lang})`}
+              </option>
+            ))}
+          </select>
+        </div>
     </main>
   );
 }
