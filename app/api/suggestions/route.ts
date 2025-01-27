@@ -20,7 +20,7 @@ const suggestionsSchema = z.object({
 export async function POST(request: Request) {
   try {
     const { userInput, chatHistory }: {
-      userInput?: string; 
+      userInput?: string;
       chatHistory: ChatMessage[];
     } = await request.json();
 
@@ -65,9 +65,7 @@ ${userInput ? `User is currently typing: "${userInput}"` : ''}`
       response_format: zodResponseFormat(suggestionsSchema, 'suggestions'),
     });
 
-    let suggestions = (JSON.parse(completion.choices[0]?.message?.content || '{ suggestions: [] }').suggestions || []) as string[]
-
-    console.log({formattedHistory, userInput, suggestions})
+    const suggestions = (JSON.parse(completion.choices[0]?.message?.content || '{ suggestions: [] }').suggestions || []) as string[]
 
     return NextResponse.json({ suggestions });
 

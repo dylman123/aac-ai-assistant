@@ -8,7 +8,6 @@ interface ChatMessage {
 }
 
 export default function Home() {
-  const [partnerInput, setPartnerInput] = useState('');
   const [userInput, setUserInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -18,6 +17,10 @@ export default function Home() {
   // Add debounce timeout ref
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
   // Add effect to scroll to bottom whenever chat history changes
   useEffect(() => {
     if (chatWindowRef.current) {
@@ -25,19 +28,18 @@ export default function Home() {
     }
   }, [chatHistory, suggestions]);
 
-  const getSuggestions = async (inputValue?: string) => {
-    if (!inputValue?.trim() && !partnerInput.trim()) return;
-    
+  const getSuggestions = async ({newUserInput, newPartnerInput}: {newUserInput?: string, newPartnerInput?: string}) => {
+    console.log({newUserInput, newPartnerInput})
+    if (!newUserInput?.trim() && !newPartnerInput?.trim()) return;
     setLoading(true);
 
     // Only update partner input state if there was a message
-    const newChatHistory = partnerInput.trim() 
-      ? [...chatHistory, { text: partnerInput, isUser: false }]
+    const newChatHistory = newPartnerInput?.trim() 
+      ? [...chatHistory, { text: newPartnerInput, isUser: false }]
       : chatHistory;
 
-    if (partnerInput.trim()) {
+    if (newPartnerInput?.trim()) {
       setChatHistory(newChatHistory);
-      setPartnerInput('');
     }
 
     try {
@@ -46,8 +48,8 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          userInput: inputValue,
+        body: JSON.stringify({
+          userInput: newUserInput,
           chatHistory: newChatHistory,
         }),
       });
@@ -81,7 +83,7 @@ export default function Home() {
 
     // Set new timeout
     debounceTimeout.current = setTimeout(() => {
-      getSuggestions(newValue);
+      getSuggestions({newUserInput: newValue});
     }, 300); // 300ms debounce
   };
 
@@ -101,29 +103,88 @@ export default function Home() {
     setSuggestions([]);
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.start(250); // Collect data every 250ms
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') return;
+
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+    
+    // Stop all tracks
+    mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+
+    // Process the audio after stopping
+    if (audioChunksRef.current.length === 0) return;
+
+    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' });
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.mp3');
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData,
+      });      
+      const data = await response.json();
+      console.log({data})
+      if (data.text) {
+        getSuggestions({newPartnerInput: data.text});
+      }
+    } catch (error) {
+      console.error('Transcription error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">AAC Assistant</h1>
       
       {/* Conversation Partner's Input Area */}
       <div className="bg-green-50 p-4 rounded-lg mb-4">
-        <div className="text-sm text-green-700 font-semibold mb-2">Conversation Partner's Input</div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={partnerInput}
-            onChange={(e) => setPartnerInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && getSuggestions()}
-            placeholder="Type your message..."
-            className="flex-1 p-2 border border-green-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-green-300 focus:border-green-300"
-            disabled={loading}
-          />
+        <div className="text-sm text-green-700 font-semibold mb-2">Conversation Partner&apos;s Speech Input</div>
+        <div className="flex justify-center">
           <button
-            onClick={() => getSuggestions()}
+            onClick={isRecording ? stopRecording : startRecording}
             disabled={loading}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400"
+            className={`px-6 py-3 rounded-full flex items-center gap-2 transition-colors duration-200 ${
+              isRecording 
+                ? 'bg-red-500 hover:bg-red-600 text-white' 
+                : 'bg-green-500 hover:bg-green-600 text-white'
+            } disabled:bg-gray-400`}
           >
-            {loading ? 'Loading...' : 'Send'}
+            {isRecording ? (
+              <>
+                <span className="animate-pulse">●</span> Stop Recording
+              </>
+            ) : (
+              <>
+                <span>🎤</span> Start Recording
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -189,8 +250,8 @@ export default function Home() {
             onClick={handleSendMessage}
             disabled={!userInput.trim()}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg 
-                     hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed
-                     transition-colors duration-200"
+              hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed
+              transition-colors duration-200"
           >
             Send
           </button>
