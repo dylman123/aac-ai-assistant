@@ -276,18 +276,18 @@ export default function Home() {
       {/* Shared Chat History */}
       <div 
         ref={chatWindowRef}
-        className="mb-4 border rounded-lg p-4 h-[400px] overflow-y-auto bg-gray-50"
+        className="mb-4 border rounded-2xl p-4 h-[400px] overflow-y-auto bg-white dark:bg-[#2D2D2D] transition-colors duration-300"
       >
-        <div className="text-sm text-gray-500 font-semibold mb-2 text-center sticky -top-4 bg-gray-50">
+        <div className="text-sm text-gray-500 dark:text-gray-300 font-semibold mb-2 text-center sticky -top-4">
           Conversation History
         </div>
         
         {chatHistory.map((message, index) => (
           <div
             key={index}
-            className={`mb-2 p-2 rounded-lg ${
+            className={`mb-2 p-2 rounded-xl ${
               message.isUser
-                ? 'bg-[#00CED1] text-white ml-auto max-w-[80%]'
+                ? 'bg-[#00CED1] dark:bg-[#00E5E8] text-white ml-auto max-w-[80%]'
                 : 'bg-[#2D3748] text-white mr-auto max-w-[80%]'
             }`}
           >
@@ -299,16 +299,15 @@ export default function Home() {
         {suggestions.length > 0 && (
           <div className="flex flex-col gap-2 mt-4">
             {suggestions.map((suggestion, index) => (
-              <div key={index} className="ml-auto flex items-center gap-2 justify-end">
-                <div className="text-3xl text-[#00CED1] font-semibold mb-2">
+              <div key={`suggestion-container-${index}`} className="ml-auto flex items-center gap-2 justify-end">
+                <div className="text-3xl text-[#00CED1] dark:text-[#00E5E8] font-semibold mb-2">
                   {index === 0 ? '😊' : index === 1 ? '😐' : '😞'}
                 </div>
                 <button
-                  key={index}
                   onClick={() => selectSuggestion(suggestion)}
-                  className="ml-4 p-2 rounded-lg bg-[#B2F0F0] text-[#2D3748] 
-                         hover:bg-[#00CED1] hover:text-white transition-colors duration-200
-                         text-left max-w-[80%] cursor-pointer"
+                  className="ml-4 p-2 rounded-xl bg-[#B2F0F0] dark:bg-[#80F2F4] text-[#2D3748] 
+                         hover:bg-[#00CED1] dark:hover:bg-[#00E5E8] hover:text-white 
+                         transition-colors duration-200 text-left max-w-[80%] cursor-pointer"
                 >
                   {suggestion}
                 </button>
@@ -319,7 +318,7 @@ export default function Home() {
       </div>
 
       {/* Combined User Input Area with Voice Settings */}
-      <div className="bg-blue-50 p-4 rounded-lg mb-2">
+      <div className="bg-[#B2F0F0] dark:bg-[#2D3748] p-4 rounded-2xl mb-2 transition-colors duration-300">
         <div className="flex gap-2">
           <input
             type="text"
@@ -328,14 +327,19 @@ export default function Home() {
             onBlur={handleInputBlur}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type to modify suggestions..."
-            className="flex-1 p-2 border border-blue-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
+            className="flex-1 p-2 border border-[#00CED1] dark:border-[#00E5E8] rounded-xl 
+                     text-black dark:text-white bg-white dark:bg-[#1A1A1A]
+                     focus:ring-2 focus:ring-[#00CED1] dark:focus:ring-[#00E5E8] 
+                     focus:border-[#00CED1] dark:focus:border-[#00E5E8]
+                     transition-colors duration-300"
           />
           <button
             onClick={handleSendMessage}
             disabled={!userInput.trim()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg 
-              hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed
-              transition-colors duration-200"
+            className="px-4 py-2 bg-[#00CED1] dark:bg-[#00E5E8] text-white rounded-xl 
+                     hover:bg-[#008B8B] dark:hover:bg-[#80F2F4] 
+                     disabled:bg-gray-400 disabled:cursor-not-allowed
+                     transition-colors duration-200"
           >
             Send
           </button>
@@ -343,25 +347,28 @@ export default function Home() {
       </div>
 
       {/* Voice Settings */}
-      <div className="flex justify-end items-center gap-2 text-xs text-gray-600">
-          <label className="whitespace-nowrap text-gray-700 dark:text-gray-300">
-            Voice:
-          </label>
-          <select
-            value={selectedVoice?.voiceURI || ''}
-            onChange={(e) => {
-              const voice = voices.find(v => v.voiceURI === e.target.value);
-              setSelectedVoice(voice || null);
-            }}
-            className="p-1 border border-gray-300 dark:border-gray-600 rounded text-xs bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-300 focus:border-blue-300"
-          >
-            {voices.map((voice, index) => (
-              <option key={`${voice.voiceURI}-${index}`} value={voice.voiceURI}>
-                {`${voice.name} (${voice.lang})`}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex justify-end items-center gap-2 text-xs text-[#4A4A4A] dark:text-[#B0B0B0]">
+        <label className="whitespace-nowrap">
+          Voice:
+        </label>
+        <select
+          value={selectedVoice?.voiceURI || ''}
+          onChange={(e) => {
+            const voice = voices.find(v => v.voiceURI === e.target.value);
+            setSelectedVoice(voice || null);
+          }}
+          className="p-1 border border-[#00CED1] dark:border-[#00E5E8] rounded-xl text-xs 
+                   bg-white dark:bg-[#2D2D2D] text-black dark:text-white 
+                   focus:ring-1 focus:ring-[#00CED1] dark:focus:ring-[#00E5E8] 
+                   transition-colors duration-300"
+        >
+          {voices.map((voice, index) => (
+            <option key={`${voice.voiceURI}-${index}`} value={voice.voiceURI}>
+              {`${voice.name} (${voice.lang})`}
+            </option>
+          ))}
+        </select>
+      </div>
     </main>
   );
 }
