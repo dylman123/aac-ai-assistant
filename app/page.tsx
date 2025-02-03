@@ -240,7 +240,7 @@ export default function Home() {
             height={40}
           />
         </div>
-        <h2 className="text-lg font-light text-center">Communication made easier for social butterflies</h2>
+        <h2 className="text-lg font-light text-center">Easier communication for social butterflies</h2>
       </div>
       
       {/* Conversation Partner's Audio Input */}
