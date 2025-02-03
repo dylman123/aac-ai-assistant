@@ -344,7 +344,7 @@ export default function Home() {
 
       {/* Voice Settings */}
       <div className="flex justify-end items-center gap-2 text-xs text-gray-600">
-          <label className="whitespace-nowrap text-gray-700">
+          <label className="whitespace-nowrap text-gray-700 dark:text-gray-300">
             Voice:
           </label>
           <select
@@ -355,8 +355,8 @@ export default function Home() {
             }}
             className="p-1 border border-gray-300 dark:border-gray-600 rounded text-xs bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-300 focus:border-blue-300"
           >
-            {voices.map((voice) => (
-              <option key={voice.voiceURI} value={voice.voiceURI}>
+            {voices.map((voice, index) => (
+              <option key={`${voice.voiceURI}-${index}`} value={voice.voiceURI}>
                 {`${voice.name} (${voice.lang})`}
               </option>
             ))}
