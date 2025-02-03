@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 interface ChatMessage {
   text: string;
@@ -223,7 +224,24 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-8 text-center">Smart AAC Assistant</h1>
+      <div className="flex flex-col items-center justify-center mb-8">
+        <div className="flex items-center justify-center gap-4">
+          <Image
+            src="/butterfly.png"
+            alt="Flutterby logo"
+            width={40}
+            height={40}
+          />
+          <h1 className="text-4xl font-bold mb-2 text-center">Flutterby</h1>
+          <Image
+            src="/butterfly.png"
+            alt="Flutterby logo"
+            width={40}
+            height={40}
+          />
+        </div>
+        <h2 className="text-lg font-light text-center">Communication made easier for social butterflies</h2>
+      </div>
       
       {/* Conversation Partner's Audio Input */}
       <div className="mb-4 flex flex-col items-center gap-2">
@@ -233,11 +251,11 @@ export default function Home() {
           className={`px-6 py-3 rounded-full flex items-center gap-2 transition-colors duration-200 ${
             isRecording 
               ? 'bg-red-500 hover:bg-red-600 text-white' 
-              : 'bg-green-500 hover:bg-green-600 text-white'
+              : 'bg-[#00CED1] hover:bg-[#008B8B] text-white'
           } disabled:bg-gray-400 disabled:cursor-not-allowed`}
         >
           {loading ? (
-            <span className="animate-spin">⏳</span>
+            <span className="inline-block animate-flutter">🦋</span>
           ) : isRecording ? (
             <>
               <span className="animate-pulse">●</span> Stop Listening
@@ -269,8 +287,8 @@ export default function Home() {
             key={index}
             className={`mb-2 p-2 rounded-lg ${
               message.isUser
-                ? 'bg-blue-500 text-white ml-auto max-w-[80%]'
-                : 'bg-green-500 text-white mr-auto max-w-[80%]'
+                ? 'bg-[#00CED1] text-white ml-auto max-w-[80%]'
+                : 'bg-[#2D3748] text-white mr-auto max-w-[80%]'
             }`}
           >
             {message.text}
@@ -282,17 +300,17 @@ export default function Home() {
           <div className="flex flex-col gap-2 mt-4">
             {suggestions.map((suggestion, index) => (
               <div key={index} className="ml-auto flex items-center gap-2 justify-end">
-                <div className="text-3xl text-blue-700 font-semibold mb-2">
+                <div className="text-3xl text-[#00CED1] font-semibold mb-2">
                   {index === 0 ? '😊' : index === 1 ? '😐' : '😞'}
                 </div>
                 <button
                   key={index}
                   onClick={() => selectSuggestion(suggestion)}
-                  className="ml-4 p-2 rounded-lg bg-blue-100 text-blue-900 
-                         hover:bg-blue-200 transition-colors duration-200
+                  className="ml-4 p-2 rounded-lg bg-[#B2F0F0] text-[#2D3748] 
+                         hover:bg-[#00CED1] hover:text-white transition-colors duration-200
                          text-left max-w-[80%] cursor-pointer"
-              >
-                {suggestion}
+                >
+                  {suggestion}
                 </button>
               </div>
             ))}
@@ -325,8 +343,8 @@ export default function Home() {
       </div>
 
       {/* Voice Settings */}
-      <div className="flex justify-end items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-          <label className="whitespace-nowrap text-gray-700 dark:text-gray-200">
+      <div className="flex justify-end items-center gap-2 text-xs text-gray-600">
+          <label className="whitespace-nowrap text-gray-700">
             Voice:
           </label>
           <select

@@ -3,19 +3,53 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --primary: #00CED1;
+  --primary-light: #B2F0F0;
+  --primary-dark: #008B8B;
+  --black: #000000;
+  --white: #F5F5F5;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Quicksand', sans-serif;
+  background-color: var(--white);
+  color: var(--black);
+}
+
+.container {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.button {
+  background-color: var(--primary);
+  color: var(--white);
+  border-radius: 25px;
+  padding: 12px 24px;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* Add subtle butterfly motifs */
+.input-field {
+  border: 2px solid var(--primary-light);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.2);
 }

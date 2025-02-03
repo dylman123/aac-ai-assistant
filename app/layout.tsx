@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: 'AAC Assistant',
-  description: 'AI-powered AAC application for better communication',
+  title: 'Flutterby',
+  description: 'Communication made easier for social butterflies',
 };
 
 export default function RootLayout({
