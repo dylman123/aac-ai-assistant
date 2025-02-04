@@ -240,7 +240,7 @@ export default function Home() {
             height={40}
           />
         </div>
-        <h2 className="text-lg font-light text-center">Easier communication for social butterflies</h2>
+        <h2 className="text-md font-light text-center">Easier communication for social butterflies with speech difficulties</h2>
       </div>
       
       {/* Conversation Partner's Audio Input */}
@@ -261,9 +261,9 @@ export default function Home() {
               <span className="animate-pulse">●</span> Stop Listening
             </>
           ) : (
-            <>
+            <div className="text-black">
               <span>👂</span> Start Listening
-            </>
+            </div>
           )}
         </button>
         {permissionError && (
@@ -287,7 +287,7 @@ export default function Home() {
             key={index}
             className={`mb-2 p-2 rounded-xl ${
               message.isUser
-                ? 'bg-[#00CED1] dark:bg-[#00E5E8] text-white ml-auto max-w-[80%]'
+                ? 'bg-[#00CED1] dark:bg-[#00E5E8] text-black ml-auto max-w-[80%]'
                 : 'bg-[#2D3748] text-white mr-auto max-w-[80%]'
             }`}
           >

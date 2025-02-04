@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: 'Flutterby',
-  description: 'Easier communication for social butterflies',
+  description: 'Easier communication for social butterflies with speech difficulties',
 };
 
 export default function RootLayout({
