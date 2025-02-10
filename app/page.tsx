@@ -225,22 +225,12 @@ export default function Home() {
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
       <div className="flex flex-col items-center justify-center mb-8">
+        <h1 className="text-4xl mb-2 text-center">BEE</h1>
         <div className="flex items-center justify-center gap-4">
-          <Image
-            src="/butterfly.png"
-            alt="Flutterby logo"
-            width={40}
-            height={40}
-          />
-          <h1 className="text-4xl font-bold mb-2 text-center">Flutterby</h1>
-          <Image
-            src="/butterfly.png"
-            alt="Flutterby logo"
-            width={40}
-            height={40}
-          />
+          🐝
+          <h2 className="text-md text-center">Buddy for Easier Expression</h2>
+          🐝
         </div>
-        <h2 className="text-md font-light text-center">Easier communication for social butterflies with speech difficulties</h2>
       </div>
       
       {/* Conversation Partner's Audio Input */}
@@ -251,18 +241,18 @@ export default function Home() {
           className={`px-6 py-3 rounded-full flex items-center gap-2 transition-colors duration-200 ${
             isRecording 
               ? 'bg-red-500 hover:bg-red-600 text-white' 
-              : 'bg-[#00CED1] hover:bg-[#008B8B] text-white'
+              : 'bg-yellow-400 hover:bg-yellow-500 text-black'
           } disabled:bg-gray-400 disabled:cursor-not-allowed`}
         >
           {loading ? (
-            <span className="inline-block animate-flutter">🦋</span>
+            <span className="inline-block animate-flutter">🐝</span>
           ) : isRecording ? (
             <>
               <span className="animate-pulse">●</span> Stop Listening
             </>
           ) : (
             <div className="text-black">
-              <span>👂</span> Start Listening
+              Start Listening
             </div>
           )}
         </button>
@@ -287,8 +277,8 @@ export default function Home() {
             key={index}
             className={`mb-2 p-2 rounded-xl ${
               message.isUser
-                ? 'bg-[#00CED1] dark:bg-[#00E5E8] text-black ml-auto max-w-[80%]'
-                : 'bg-[#2D3748] text-white mr-auto max-w-[80%]'
+                ? 'bg-yellow-400 text-black ml-auto max-w-[80%]'
+                : 'bg-yellow-700 text-white mr-auto max-w-[80%]'
             }`}
           >
             {message.text}
@@ -300,13 +290,13 @@ export default function Home() {
           <div className="flex flex-col gap-2 mt-4">
             {suggestions.map((suggestion, index) => (
               <div key={`suggestion-container-${index}`} className="ml-auto flex items-center gap-2 justify-end">
-                <div className="text-3xl text-[#00CED1] dark:text-[#00E5E8] font-semibold mb-2">
+                <div className="text-3xl text-yellow-400 dark:text-yellow-400 font-semibold mb-2">
                   {index === 0 ? '😊' : index === 1 ? '😐' : '😞'}
                 </div>
                 <button
                   onClick={() => selectSuggestion(suggestion)}
-                  className="ml-4 p-2 rounded-xl bg-[#B2F0F0] dark:bg-[#80F2F4] text-[#2D3748] 
-                         hover:bg-[#00CED1] dark:hover:bg-[#00E5E8] hover:text-white 
+                  className="ml-4 p-2 rounded-xl bg-yellow-100 dark:bg-yellow-200 text-black 
+                         hover:bg-yellow-400 dark:hover:bg-yellow-400 hover:text-black 
                          transition-colors duration-200 text-left max-w-[80%] cursor-pointer"
                 >
                   {suggestion}
@@ -318,7 +308,7 @@ export default function Home() {
       </div>
 
       {/* Combined User Input Area with Voice Settings */}
-      <div className="bg-[#B2F0F0] dark:bg-[#2D3748] p-4 rounded-2xl mb-2 transition-colors duration-300">
+      <div className="bg-yellow-100 dark:bg-[#2D3748] p-4 rounded-2xl mb-2 transition-colors duration-300">
         <div className="flex gap-2">
           <input
             type="text"
@@ -327,17 +317,17 @@ export default function Home() {
             onBlur={handleInputBlur}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type to modify suggestions..."
-            className="flex-1 p-2 border border-[#00CED1] dark:border-[#00E5E8] rounded-xl 
+            className="flex-1 p-2 border border-yellow-400 dark:border-yellow-400 rounded-xl 
                      text-black dark:text-white bg-white dark:bg-[#1A1A1A]
-                     focus:ring-2 focus:ring-[#00CED1] dark:focus:ring-[#00E5E8] 
-                     focus:border-[#00CED1] dark:focus:border-[#00E5E8]
+                     focus:ring-2 focus:ring-yellow-400 dark:focus:ring-yellow-400 
+                     focus:border-yellow-400 dark:focus:border-yellow-400
                      transition-colors duration-300"
           />
           <button
             onClick={handleSendMessage}
             disabled={!userInput.trim()}
-            className="px-4 py-2 bg-[#00CED1] dark:bg-[#00E5E8] text-white rounded-xl 
-                     hover:bg-[#008B8B] dark:hover:bg-[#80F2F4] 
+            className="px-4 py-2 bg-yellow-400 dark:bg-yellow-400 text-black rounded-xl 
+                     hover:bg-yellow-500 dark:hover:bg-yellow-500 
                      disabled:bg-gray-400 disabled:cursor-not-allowed
                      transition-colors duration-200"
           >
@@ -357,9 +347,9 @@ export default function Home() {
             const voice = voices.find(v => v.voiceURI === e.target.value);
             setSelectedVoice(voice || null);
           }}
-          className="p-1 border border-[#00CED1] dark:border-[#00E5E8] rounded-xl text-xs 
+          className="p-1 border border-yellow-400 dark:border-yellow-400 rounded-xl text-xs 
                    bg-white dark:bg-[#2D2D2D] text-black dark:text-white 
-                   focus:ring-1 focus:ring-[#00CED1] dark:focus:ring-[#00E5E8] 
+                   focus:ring-1 focus:ring-yellow-400 dark:focus:ring-yellow-400 
                    transition-colors duration-300"
         >
           {voices.map((voice, index) => (

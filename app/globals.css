@@ -4,10 +4,10 @@
 
 /* Base theme (light) */
 :root {
-  --primary: #00CED1;
-  --primary-light: #B2F0F0;
-  --primary-dark: #008B8B;
-  --background: #F5F5F5;
+  --primary: #A16207;      /* yellow-700 */
+  --primary-light: #FEF9C3; /* yellow-100 */
+  --primary-dark: #EAB308;  /* yellow-500 */
+  --background: #FFFBEB;    /* yellow-50 */
   --surface: #FFFFFF;
   --text: #000000;
   --text-secondary: #4A4A4A;
@@ -16,9 +16,9 @@
 /* Dark theme colors using prefers-color-scheme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary: #00E5E8;
-    --primary-light: #80F2F4;
-    --primary-dark: #008B8B;
+    --primary: #FACC15;     /* yellow-400 */
+    --primary-light: #FEF08A; /* yellow-200 */
+    --primary-dark: #EAB308;  /* yellow-500 */
     --background: #1A1A1A;
     --surface: #2D2D2D;
     --text: #E1E1E1;
@@ -51,7 +51,7 @@ body {
 }
 
 .button:hover {
-  background-color: var(--primary-light);
+  background-color: var(--primary-dark);
   transform: translateY(-2px);
 }
 
@@ -70,7 +70,7 @@ h1, h2, h3 {
 .input-field:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.2);
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2); /* yellow-400 with opacity */
 }
 
 .secondary-text {
