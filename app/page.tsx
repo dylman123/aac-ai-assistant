@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 interface ChatMessage {
   text: string;
@@ -224,11 +225,20 @@ export default function Home() {
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
       <div className="flex flex-col items-center justify-center mb-8">
-        <h1 className="text-4xl mb-2 text-center">BEE</h1>
         <div className="flex items-center justify-center gap-4">
-          🐝
-          <h2 className="text-md text-center">Buddy for Easier Expression</h2>
-          🐝
+          <Image 
+            src="/bee.png"
+            alt="Bee"
+            width={40}
+            height={40}
+          />
+          <h1 className="text-4xl mb-2 text-center">Bee</h1>
+          <Image 
+            src="/bee.png"
+            alt="Bee"
+            width={40}
+            height={40}
+          />
         </div>
       </div>
       
