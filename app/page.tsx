@@ -276,11 +276,7 @@ export default function Home() {
       <div 
         ref={chatWindowRef}
         className="mb-4 border rounded-2xl p-4 h-[400px] overflow-y-auto bg-white dark:bg-[#2D2D2D] transition-colors duration-300"
-      >
-        <div className="text-sm text-gray-500 dark:text-gray-300 font-semibold mb-2 text-center sticky -top-4">
-          Conversation History
-        </div>
-        
+      > 
         {chatHistory.map((message, index) => (
           <div
             key={index}
