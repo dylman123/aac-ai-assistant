@@ -226,7 +226,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
-      <div className="h-[100px] relative overflow-hidden">
+      <div className="h-[100px] md:w-[300px] md:mx-auto relative overflow-hidden">
         <Image 
           src={resolvedTheme === 'dark' ? '/bee-dark.png' : '/bee-light.png'}
           alt="Bee"
