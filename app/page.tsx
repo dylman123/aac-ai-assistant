@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useTheme } from 'next-themes';
 
 interface ChatMessage {
   text: string;
@@ -9,6 +10,7 @@ interface ChatMessage {
 }
 
 export default function Home() {
+  const { resolvedTheme } = useTheme();
   const [userInput, setUserInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -224,22 +226,13 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
-      <div className="flex flex-col items-center justify-center mb-8">
-        <div className="flex items-center justify-center gap-4">
-          <Image 
-            src="/bee.png"
-            alt="Bee"
-            width={40}
-            height={40}
-          />
-          <h1 className="text-4xl mb-2 text-center">Bee</h1>
-          <Image 
-            src="/bee.png"
-            alt="Bee"
-            width={40}
-            height={40}
-          />
-        </div>
+      <div className="h-[100px] relative overflow-hidden">
+        <Image 
+          src={resolvedTheme === 'dark' ? '/bee-dark.png' : '/bee-light.png'}
+          alt="Bee"
+          fill
+          className="object-cover object-center"
+        />
       </div>
       
       {/* Conversation Partner's Audio Input */}
