@@ -228,7 +228,7 @@ export default function Home() {
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
       <div className="h-[100px] md:w-[300px] md:mx-auto relative overflow-hidden">
         <Image 
-          src={resolvedTheme === 'dark' ? '/bee-dark.png' : '/bee-light.png'}
+          src={resolvedTheme === 'dark' ? '/bee-dark.PNG' : '/bee-light.PNG'}
           alt="Bee"
           fill
           className="object-cover object-center"
