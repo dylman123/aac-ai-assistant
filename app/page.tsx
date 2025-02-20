@@ -39,7 +39,11 @@ export default function Home() {
 
   // Add useEffect to load voices
   useEffect(() => {
+    // Move the loadVoices function inside useEffect
     const loadVoices = () => {
+      // Guard against server-side rendering
+      if (typeof window === 'undefined') return;
+      
       const availableVoices = window.speechSynthesis.getVoices();
       setVoices(availableVoices);
       // Set default voice (preferably an English one)
@@ -51,10 +55,14 @@ export default function Home() {
     loadVoices();
     
     // Chrome loads voices asynchronously, so we need this
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    if (typeof window !== 'undefined') {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
     return () => {
-      window.speechSynthesis.onvoiceschanged = null;
+      if (typeof window !== 'undefined') {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
     };
   }, []);
 
@@ -96,6 +104,9 @@ export default function Home() {
   };
 
   const selectSuggestion = (suggestion: string) => {
+    // Guard against server-side rendering
+    if (typeof window === 'undefined') return;
+
     const utterance = new SpeechSynthesisUtterance(suggestion);
     if (selectedVoice) {
       utterance.voice = selectedVoice;
