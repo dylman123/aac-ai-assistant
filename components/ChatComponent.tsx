@@ -32,18 +32,16 @@ export default function ChatComponent() {
   
     // Add effect to scroll to bottom whenever chat history changes
     useEffect(() => {
-      if (chatWindowRef.current) {
+      if (chatWindowRef?.current) {
         chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
       }
     }, [chatHistory, suggestions]);
   
     // Add useEffect to load voices
     useEffect(() => {
+      if (!window?.speechSynthesis) return;
       // Move the loadVoices function inside useEffect
-      const loadVoices = () => {
-        // Guard against server-side rendering
-        if (typeof window === 'undefined') return;
-        
+      const loadVoices = () => {        
         const availableVoices = window.speechSynthesis.getVoices();
         setVoices(availableVoices);
         // Set default voice (preferably an English one)
@@ -54,15 +52,10 @@ export default function ChatComponent() {
       // Load voices immediately if available
       loadVoices();
       
-      // Chrome loads voices asynchronously, so we need this
-      if (typeof window !== 'undefined') {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-      }
+      window.speechSynthesis.onvoiceschanged = loadVoices;
   
       return () => {
-        if (typeof window !== 'undefined') {
-          window.speechSynthesis.onvoiceschanged = null;
-        }
+        window.speechSynthesis.onvoiceschanged = null;
       };
     }, []);
   
@@ -105,7 +98,7 @@ export default function ChatComponent() {
   
     const selectSuggestion = (suggestion: string) => {
       // Guard against server-side rendering
-      if (typeof window === 'undefined') return;
+      if (!window?.speechSynthesis) return;
   
       const utterance = new SpeechSynthesisUtterance(suggestion);
       if (selectedVoice) {
